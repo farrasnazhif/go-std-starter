@@ -1,0 +1,48 @@
+{{define "subject"}}Complete Your GopherSocial Registration{{end}}
+
+{{define "body"}}
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+
+  <p>Hi {{.Username}},</p>
+
+  <p>
+    Welcome to <strong>GopherSocial</strong>! We're excited to have you join our community.
+  </p>
+
+  <p>
+    To get started, please confirm your email address by clicking the link below:
+  </p>
+
+  <p>
+    <a href="{{.ActivationURL}}" style="color: #1a73e8;">
+      Confirm Your Email
+    </a>
+  </p>
+
+  <p>
+    If the button above doesn’t work, you can copy and paste the following link into your browser:
+  </p>
+
+  <p>
+    {{.ActivationURL}}
+  </p>
+
+  <p>
+    If you didn’t create a GopherSocial account, you can safely ignore this email.
+  </p>
+
+  <p>
+    Thanks,<br />
+    <strong>The GopherSocial Team</strong>
+  </p>
+
+</body>
+</html>
+{{end}}
