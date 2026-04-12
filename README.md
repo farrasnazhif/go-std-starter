@@ -66,39 +66,49 @@ A clean, structured Go starter project with user authentication, user management
    cd go-std-starter
    ```
 
-2. **Start PostgreSQL with Docker Compose**
+2. **Allow direnv** (if using `.envrc` file)
 
    ```bash
-   docker-compose up -d
+   direnv allow .
    ```
 
-3. **Install migrate tool** (if not installed)
+3. **Start PostgreSQL with Docker Compose**
+
+   ```bash
+   docker compose --build up
+   ```
+
+4. **Install migrate tool** (if not installed)
 
    ```bash
    go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
    ```
 
-4. **Run database migrations**
+5. **Run database migrations**
 
    ```bash
    make migrate-up
    ```
 
-5. **Install dependencies**
+6. **Install dependencies**
 
    ```bash
    go mod tidy
    go mod download
    ```
 
-6. **Build the project**
+7. **Start the server**
 
+   **Option A: Using air (hot reload for development)**
+   
    ```bash
-   go build -o bin/api ./cmd/api/
+   air
    ```
 
-7. **Run the server**
+   **Option B: Build and run manually**
+   
    ```bash
+   go build -o bin/api ./cmd/api/
    ./bin/api
    ```
 
@@ -106,7 +116,10 @@ The API will be available at `http://localhost:8080`
 
 ## Environment Variables
 
-Create a `.env` file or set these environment variables:
+You can set environment variables in two ways:
+
+### Option 1: Using `.env` file
+Create a `.env` file in the project root:
 
 ```bash
 # Server
@@ -126,6 +139,21 @@ FRONTEND_URL=http://localhost:3000
 # Email (SendGrid)
 SENDGRID_API_KEY=your_sendgrid_api_key_here
 ```
+
+### Option 2: Using `.envrc` (with direnv)
+If you're using direnv, create a `.envrc` file with your environment variables and run:
+
+```bash
+direnv allow .
+```
+
+**After modifying `.envrc`**, always run:
+
+```bash
+direnv allow .
+```
+
+This will reload the environment variables.
 
 ## API Endpoints
 
