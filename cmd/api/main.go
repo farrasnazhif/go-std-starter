@@ -42,9 +42,10 @@ func main() {
 		},
 		env: env.GetString("ENV", "development"),
 		mail: mailConfig{
-			exp: time.Hour * 24 * 3, // 3 days
-			sendGrid: sendGridConfig{
-				apiKey: env.GetString("SENDGRID_API_KEY", ""),
+			fromEmail: env.GetString("MAIL_FROM_EMAIL", "onboarding@resend.dev"),
+			exp:       time.Hour * 24 * 3, // 3 days
+			resend: resendConfig{
+				apiKey: env.GetString("RESEND_API_KEY", ""),
 			},
 		},
 	}
@@ -69,7 +70,7 @@ func main() {
 
 	store := store.NewStorage(db)
 
-	mailer := mailer.NewSendGrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
+	mailer := mailer.NewResend(cfg.mail.resend.apiKey, cfg.mail.fromEmail)
 
 	app := &application{
 		config: cfg,

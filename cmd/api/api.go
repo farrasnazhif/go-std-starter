@@ -31,12 +31,12 @@ type config struct {
 }
 
 type mailConfig struct {
-	sendGrid  sendGridConfig
+	resend    resendConfig
 	fromEmail string
 	exp       time.Duration
 }
 
-type sendGridConfig struct {
+type resendConfig struct {
 	apiKey string
 }
 

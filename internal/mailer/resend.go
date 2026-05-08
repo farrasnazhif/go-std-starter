@@ -7,30 +7,24 @@ import (
 	"log"
 	"time"
 
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"github.com/resend/resend-go/v2"
 )
 
-type SendGridMailer struct {
+type ResendMailer struct {
 	fromEmail string
-	apiKey    string
-	client    *sendgrid.Client
+	client    *resend.Client
 }
 
-func NewSendGrid(apiKey, fromEmail string) *SendGridMailer {
-	client := sendgrid.NewSendClient(apiKey)
+func NewResend(apiKey, fromEmail string) *ResendMailer {
+	client := resend.NewClient(apiKey)
 
-	return &SendGridMailer{
+	return &ResendMailer{
 		fromEmail: fromEmail,
-		apiKey:    apiKey,
 		client:    client,
 	}
 }
 
-func (m *SendGridMailer) Send(templateFile, username, email string, data any, isSandbox bool) error {
-	from := mail.NewEmail(FromName, m.fromEmail)
-	to := mail.NewEmail(username, email)
-
+func (m *ResendMailer) Send(templateFile, username, email string, data any, isSandbox bool) error {
 	// template parsing and building
 	tmpl, err := template.ParseFS(FS, "templates/"+templateFile)
 	if err != nil {
@@ -49,16 +43,17 @@ func (m *SendGridMailer) Send(templateFile, username, email string, data any, is
 		return err
 	}
 
-	message := mail.NewSingleEmail(from, subject.String(), to, "", body.String())
+	// Build the send email request
+	request := &resend.SendEmailRequest{
+		From:    m.fromEmail,
+		To:      []string{email},
+		Subject: subject.String(),
+		Html:    body.String(),
+	}
 
-	message.SetMailSettings(&mail.MailSettings{
-		SandboxMode: &mail.Setting{
-			Enable: &isSandbox,
-		},
-	})
-
+	// Retry logic with exponential backoff
 	for i := 0; i < maxRetires; i++ {
-		response, err := m.client.Send(message)
+		sent, err := m.client.Emails.Send(request)
 		if err != nil {
 			log.Printf("Failed to send email to %v, attempt %d of %d", email, i+1, maxRetires)
 			log.Printf("Error: %v", err)
@@ -68,7 +63,7 @@ func (m *SendGridMailer) Send(templateFile, username, email string, data any, is
 			continue
 		}
 
-		log.Printf("Email sent with status code %v", response.StatusCode)
+		log.Printf("Email sent successfully with ID: %v", sent.Id)
 		return nil
 	}
 

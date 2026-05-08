@@ -1,128 +1,50 @@
 # Go User Management API Starter
 
-A clean, structured Go starter project with user authentication, user management, and email invitations. This is a minimal starter focused on user workflows without social features.
-
-## Project Structure
-
-```
-├── cmd/
-│   ├── api/              # API server
-│   │   ├── main.go       # Entry point
-│   │   ├── api.go        # Routes and HTTP configuration
-│   │   ├── auth.go       # Authentication handlers
-│   │   ├── users.go      # User handlers
-│   │   ├── health.go     # Health check handler
-│   │   ├── errors.go     # Error handling utilities
-│   │   └── json.go       # JSON utilities
-│   └── migrate/
-│       ├── migrations/   # Database migration files (user & invitation tables)
-│       └── seed/         # Database seeding scripts
-├── internal/
-│   ├── db/               # Database connection and setup
-│   ├── store/            # Data storage layer (users only)
-│   ├── env/              # Environment variable utilities
-│   └── mailer/           # Email service integration (SendGrid)
-├── docker-compose.yml    # PostgreSQL database setup
-├── go.mod & go.sum       # Go dependencies
-├── Makefile              # Build and utility commands
-└── .air.toml             # Hot reload configuration (for development)
-```
-
-## Features
-
-- **User Registration**: Create and register users with email and password
-- **User Authentication**: User login and account management
-- **User Profiles**: Retrieve user information
-- **Email Invitations**: Send invitations via SendGrid with token-based activation
-- **Account Activation**: Activate accounts via invitation tokens
-- **Database Migrations**: SQL-based schema management
-- **API Documentation**: Swagger/OpenAPI integration
-- **Clean Architecture**: Separation of concerns with repository pattern
+A minimal Go starter for user authentication, profile management, and email verification. Built with clean architecture principles and dependency injection.
 
 ## Tech Stack
 
-- **Go 1.25.4**
-- **Chi Router**: Fast, composable HTTP router
-- **PostgreSQL**: Primary database
-- **SendGrid**: Email service
-- **Zap**: Structured logging
-- **Swagger**: API documentation
+- **Go 1.25.4** | **Chi Router** | **PostgreSQL** | **Resend** (email) | **Zap** (logging) | **Swagger** (docs)
+
+## Features
+
+- User registration with email verification
+- Account activation via token
+- User profiles
+- Clean architecture with repository pattern
+- Swagger/OpenAPI documentation
 
 ## Getting Started
 
 ### Prerequisites
 
-- Go 1.25.4+
-- PostgreSQL 16+
-- Docker & Docker Compose (for quick database setup)
-- migrate CLI tool (for running migrations)
+- Go 1.25.4+, PostgreSQL 16+, Docker & Docker Compose
+- `migrate` CLI: `go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest`
 
-### Installation
+### Quick Start
 
-1. **Clone or initialize the project**
+```bash
+# Clone and setup
+git clone <repo> && cd go-std-starter
 
-   ```bash
-   git clone <repository-url>
-   cd go-std-starter
-   ```
+# Start PostgreSQL
+docker compose up
 
-2. **Allow direnv** (if using `.envrc` file)
+# Run migrations
+make migrate-up
 
-   ```bash
-   direnv allow .
-   ```
+# Install dependencies and start server
+go mod tidy
+air  # or: go build -o bin/api ./cmd/api/ && ./bin/api
+```
 
-3. **Start PostgreSQL with Docker Compose**
-
-   ```bash
-   docker compose --build up
-   ```
-
-4. **Install migrate tool** (if not installed)
-
-   ```bash
-   go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-   ```
-
-5. **Run database migrations**
-
-   ```bash
-   make migrate-up
-   ```
-
-6. **Install dependencies**
-
-   ```bash
-   go mod tidy
-   go mod download
-   ```
-
-7. **Start the server**
-
-   **Option A: Using air (hot reload for development)**
-   
-   ```bash
-   air
-   ```
-
-   **Option B: Build and run manually**
-   
-   ```bash
-   go build -o bin/api ./cmd/api/
-   ./bin/api
-   ```
-
-The API will be available at `http://localhost:8080`
+API runs on `http://localhost:8080`
 
 ## Environment Variables
 
-You can set environment variables in two ways:
+Create `.env` file in project root:
 
-### Option 1: Using `.env` file
-Create a `.env` file in the project root:
-
-```bash
-# Server
+```env
 ADDR=:8080
 ENV=development
 
@@ -132,155 +54,87 @@ DB_MAX_OPEN_CONNS=30
 DB_MAX_IDLE_CONNS=30
 DB_MAX_IDLE_TIME=15m
 
-# External URLs
+# URLs
 EXTERNAL_URL=localhost:8080
 FRONTEND_URL=http://localhost:3000
 
-# Email (SendGrid)
-SENDGRID_API_KEY=your_sendgrid_api_key_here
+# Email
+MAIL_FROM_EMAIL=onboarding@resend.dev
+RESEND_API_KEY=your_key_here
 ```
 
-### Option 2: Using `.envrc` (with direnv)
-If you're using direnv, create a `.envrc` file with your environment variables and run:
-
-```bash
-direnv allow .
-```
-
-**After modifying `.envrc`**, always run:
-
-```bash
-direnv allow .
-```
-
-This will reload the environment variables.
+Or use `.envrc` with direnv: `direnv allow .`
 
 ## API Endpoints
 
-### Health Check
-
-- `GET /api/v1/health` - Server health status
-
-### Authentication
-
-- `POST /api/v1/auth/user` - Register a new user
-
-### Users
-
-- `GET /api/v1/users/{userID}` - Get user profile
-- `PUT /api/v1/users/activate/{token}` - Activate user account
-
-### API Documentation
-
-- `GET /api/v1/swagger/*` - Swagger UI documentation
+| Method | Endpoint                         | Description      |
+| ------ | -------------------------------- | ---------------- |
+| GET    | `/api/v1/health`                 | Health check     |
+| POST   | `/api/v1/auth/user`              | Register user    |
+| GET    | `/api/v1/users/{id}`             | Get user profile |
+| PUT    | `/api/v1/users/activate/{token}` | Activate account |
+| GET    | `/api/v1/swagger/*`              | API docs         |
 
 ## Make Commands
 
 ```bash
-# Run tests
-make test
-
-# Create a new migration
-make migration NAME=create_table_name
-
-# Run migrations up
-make migrate-up
-
-# Run migrations down
-make migrate-down
-
-# Generate Swagger documentation
-make gen-docs
-
-# Seed database with sample data
-make seed
+make test              # Run tests
+make migration NAME=x  # Create migration
+make migrate-up        # Run migrations
+make migrate-down      # Rollback migrations
+make gen-docs          # Generate Swagger docs
+make seed              # Seed database
 ```
 
-## Database Schema
+## Project Structure
 
-The starter includes migrations for:
-
-- **users table** - User accounts with email, password, and activation status
-- **user_invitations table** - Email invitation tokens with expiry for account activation
-- **is_active column** - Track account activation status
+```
+├── cmd/api/        # HTTP handlers & routes
+├── internal/
+│   ├── db/         # Database connection
+│   ├── store/      # Repository layer
+│   ├── mailer/     # Email service (Resend)
+│   └── env/        # Config management
+├── docs/           # Swagger docs
+└── docker-compose.yml
+```
 
 ## Development
 
 ### Hot Reload
 
-For development with hot reload, install air:
-
 ```bash
 go install github.com/cosmtrek/air@latest
-```
-
-Then run:
-
-```bash
 air
 ```
 
-### Running Tests
+### Adding Features
+
+1. Create handler in `cmd/api/new_feature.go`
+2. Register routes in `cmd/api/api.go`
+3. Add store methods in `internal/store/`
+
+### Database Migrations
 
 ```bash
-make test
-```
-
-## Adding New Features
-
-### Adding a New Handler
-
-1. Create a handler function in `cmd/api/` (e.g., `cmd/api/new_feature.go`)
-2. Register routes in `cmd/api/api.go` within the appropriate router group
-3. Add necessary store methods in `internal/store/`
-
-### Adding Database Migrations
-
-```bash
-make migration NAME=describe_your_migration
-# Edit the generated .up.sql and .down.sql files
+make migration NAME=describe_change
+# Edit the .up.sql and .down.sql files
 make migrate-up
 ```
 
 ### Sending Emails
 
-The mailer is already integrated via SendGrid. Use `app.mailer` in your handlers:
-
 ```go
-app.mailer.Send(to, subject, htmlBody)
+app.mailer.Send(templateFile, username, email, data, isSandbox)
 ```
-
-## Project Architecture
-
-### Repository Pattern
-
-The `internal/store/` package implements the repository pattern, providing a clean abstraction over database operations.
-
-### Dependency Injection
-
-The `application` struct in `cmd/api/api.go` serves as the service locator, holding references to all dependencies (config, store, logger, mailer).
-
-### Error Handling
-
-Centralized error handling in `cmd/api/errors.go` provides consistent API error responses.
 
 ## Notes
 
-- This starter **does not** include posts, feeds, comments, or follower functionality
-- It's focused on user management and authentication workflows
-- Extend this starter by adding your own features in the appropriate layers
-- Keep business logic in the store layer, HTTP handling in the api layer
-- Use the logger instance (`app.logger`) for all logging
+- Focused on user management & auth workflows
+- No posts, feeds, comments, or social features
+- Extend with your own features maintaining the patterns
+- Keep business logic in store layer, HTTP in api layer
 
 ## License
 
 Unlicense
-
-## Contributing
-
-Feel free to extend and customize this starter for your needs.
-
----
-
-**Generated from**: go-std-starter repository structure  
-**Initial Version**: 0.0.1
