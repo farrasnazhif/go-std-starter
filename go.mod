@@ -6,6 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/go-chi/httprate v0.13.1
 	github.com/go-playground/validator/v10 v10.30.1
+	github.com/prometheus/client_golang v1.20.3
 	github.com/resend/resend-go/v2 v2.28.0
 	github.com/swaggo/http-swagger/v2 v2.0.2
 	go.uber.org/zap v1.27.1
@@ -13,8 +14,15 @@ require (
 )
 
 require (
+	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/prometheus/client_model v0.6.1 // indirect
+	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/swaggo/swag v1.16.6 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 )
 
 require (

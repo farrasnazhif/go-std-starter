@@ -73,11 +73,18 @@ func main() {
 
 	mailer := mailer.NewResend(cfg.mail.resend.apiKey, cfg.mail.fromEmail)
 
+	// Initialize metrics
+	metrics, err := NewMetrics()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	app := &application{
-		config: cfg,
-		store:  store,
-		logger: logger,
-		mailer: mailer,
+		config:  cfg,
+		store:   store,
+		logger:  logger,
+		mailer:  mailer,
+		metrics: metrics,
 	}
 
 	mux := app.mount()

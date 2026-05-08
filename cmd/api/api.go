@@ -15,10 +15,11 @@ import (
 )
 
 type application struct {
-	config config
-	store  store.Storage
-	logger *zap.SugaredLogger
-	mailer mailer.Client
+	config  config
+	store   store.Storage
+	logger  *zap.SugaredLogger
+	mailer  mailer.Client
+	metrics *Metrics
 }
 
 type config struct {
@@ -54,6 +55,10 @@ func (app *application) mount() http.Handler {
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
+	r.Use(app.metrics.MetricsMiddleware)
+
+	// Metrics endpoint (exposed outside of /api/v1)
+	r.Get("/metrics", MetricsHandler())
 
 	r.Route("/api/v1", func(r chi.Router) {
 		// GET /api/v1/health
