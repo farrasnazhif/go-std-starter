@@ -102,5 +102,7 @@ func (app *application) run(mux http.Handler) error {
 
 	app.logger.Infow("Server has starter at", "addr", app.config.addr, "env", app.config.env)
 
-	return srv.ListenAndServe()
+	// Create server with graceful shutdown support
+	server := NewServer(srv, app)
+	return server.ListenAndServeWithGracefulShutdown()
 }
