@@ -28,6 +28,7 @@ type config struct {
 	apiURL      string
 	mail        mailConfig
 	frontendURL string
+	rateLimiter RateLimitConfig
 }
 
 type mailConfig struct {
@@ -64,10 +65,12 @@ func (app *application) mount() http.Handler {
 
 		// GET /api/v1/users/{userID}
 		r.Route("/users", func(r chi.Router) {
-			r.Put("/activate/{token}", app.activateUserHandler)
+			// Apply rate limit to activation endpoint
+			r.With(app.activateRateLimiter()).Put("/activate/{token}", app.activateUserHandler)
 
 			r.Route("/{userID}", func(r chi.Router) {
 				r.Use(app.usersContextMiddleware)
+				r.Use(app.apiRateLimiter())
 
 				r.Get("/", app.getUserHandler)
 			})
@@ -75,7 +78,8 @@ func (app *application) mount() http.Handler {
 
 		// public routes
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/user", app.registerUserHandler)
+			// Apply rate limit to registration endpoint
+			r.With(app.registerRateLimiter()).Post("/user", app.registerUserHandler)
 		})
 	})
 

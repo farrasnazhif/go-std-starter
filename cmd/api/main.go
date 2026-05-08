@@ -48,6 +48,7 @@ func main() {
 				apiKey: env.GetString("RESEND_API_KEY", ""),
 			},
 		},
+		rateLimiter: DefaultRateLimitConfig(),
 	}
 
 	// logger
