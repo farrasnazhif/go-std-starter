@@ -32,3 +32,9 @@ func (app *application) conflictResponse(w http.ResponseWriter, r *http.Request,
 
 	writeJSONError(w, http.StatusConflict, "Recourse conflicted", err.Error())
 }
+
+func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
+	app.logger.Warnf("rate limit exceeded", "method", r.Method, "path", r.URL.Path)
+
+	writeJSONError(w, http.StatusTooManyRequests, "Rate limit exceeded", "you have made too many requests, please try again later")
+}

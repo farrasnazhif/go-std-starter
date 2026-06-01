@@ -58,7 +58,7 @@ func (app *application) mount() http.Handler {
 	r.Use(app.metrics.MetricsMiddleware)
 
 	// Metrics endpoint (exposed outside of /api/v1)
-	r.Get("/metrics", MetricsHandler())
+	r.With(app.metricsRateLimiter()).Get("/metrics", MetricsHandler())
 
 	r.Route("/api/v1", func(r chi.Router) {
 		// GET /api/v1/health
