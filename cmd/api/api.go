@@ -57,6 +57,7 @@ func (app *application) mount() http.Handler {
 
 	r.Use(chimw.Recoverer)
 	r.Use(chimw.Logger)
+	r.Use(middleware.CORS(middleware.DefaultCORSConfig(app.config.frontendURL)))
 	r.Use(app.metrics.Handler)
 
 	r.With(app.rateLimiter(app.config.rateLimiter.MetricsLimit)).Get("/metrics", middleware.MetricsHandler())
