@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/farrasnazhif/go-std-starter/internal/store"
+	"github.com/farrasnazhif/go-std-starter/internal/store/models"
 )
 
 var usernames = []string{
@@ -19,14 +20,14 @@ var usernames = []string{
 	"walter", "xenia", "yasmin", "zoe",
 }
 
-func Seed(store store.Storage, db *sql.DB) {
+func Seed(s store.Storage, db *sql.DB) {
 	ctx := context.Background()
 
 	users := generateUsers(100)
 	tx, _ := db.BeginTx(ctx, nil)
 
 	for _, user := range users {
-		if err := store.Users.Create(ctx, tx, user); err != nil {
+		if err := s.Users.Create(ctx, tx, user); err != nil {
 			_ = tx.Rollback()
 			log.Println("Error creating user:", err)
 			return
@@ -34,20 +35,16 @@ func Seed(store store.Storage, db *sql.DB) {
 	}
 
 	tx.Commit()
-
 	log.Println("Seeding complete!")
 }
 
-func generateUsers(num int) []*store.User {
-	users := make([]*store.User, num)
-
+func generateUsers(num int) []*models.User {
+	users := make([]*models.User, num)
 	for i := 0; i < num; i++ {
-		users[i] = &store.User{
+		users[i] = &models.User{
 			Username: usernames[i%len(usernames)] + fmt.Sprintf("%d", i),
 			Email:    usernames[i%len(usernames)] + fmt.Sprintf("%d", i) + "@example.com",
 		}
 	}
-
 	return users
 }
-

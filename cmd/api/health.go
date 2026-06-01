@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/farrasnazhif/go-std-starter/internal/lib"
 )
 
 // HealthCheck godoc
@@ -21,7 +23,7 @@ func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Reques
 		"version": version,
 	}
 
-	if err := app.jsonResponse(w, http.StatusOK, "Fetched successfully", data); err != nil {
+	if err := lib.JSONResponse(w, http.StatusOK, "Fetched successfully", data); err != nil {
 		app.internalServerError(w, r, err)
 	}
 }

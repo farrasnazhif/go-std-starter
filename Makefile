@@ -1,5 +1,5 @@
 include .envrc
-MIGRATIONS_PATH = ./cmd/migrate/migrations
+MIGRATIONS_PATH = ./internal/store/migrations
 
 .PHONY: test
 test:

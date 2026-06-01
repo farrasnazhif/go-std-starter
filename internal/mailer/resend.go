@@ -52,10 +52,10 @@ func (m *ResendMailer) Send(templateFile, username, email string, data any, isSa
 	}
 
 	// Retry logic with exponential backoff
-	for i := 0; i < maxRetires; i++ {
+	for i := 0; i < maxRetries; i++ {
 		sent, err := m.client.Emails.Send(request)
 		if err != nil {
-			log.Printf("Failed to send email to %v, attempt %d of %d", email, i+1, maxRetires)
+			log.Printf("Failed to send email to %v, attempt %d of %d", email, i+1, maxRetries)
 			log.Printf("Error: %v", err)
 
 			// exponential backoff before retrying
@@ -67,5 +67,5 @@ func (m *ResendMailer) Send(templateFile, username, email string, data any, isSa
 		return nil
 	}
 
-	return fmt.Errorf("failed to send email after %d attempts", maxRetires)
+	return fmt.Errorf("failed to send email after %d attempts", maxRetries)
 }

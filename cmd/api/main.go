@@ -3,9 +3,11 @@ package main
 import (
 	"time"
 
+	"github.com/farrasnazhif/go-std-starter/cmd/api/middleware"
 	"github.com/farrasnazhif/go-std-starter/internal/db"
 	"github.com/farrasnazhif/go-std-starter/internal/env"
 	"github.com/farrasnazhif/go-std-starter/internal/mailer"
+	"github.com/farrasnazhif/go-std-starter/internal/service"
 	"github.com/farrasnazhif/go-std-starter/internal/store"
 	"go.uber.org/zap"
 )
@@ -43,51 +45,48 @@ func main() {
 		env: env.GetString("ENV", "development"),
 		mail: mailConfig{
 			fromEmail: env.GetString("MAIL_FROM_EMAIL", "onboarding@resend.dev"),
-			exp:       time.Hour * 24 * 3, // 3 days
+			exp:       time.Hour * 24 * 3,
 			resend: resendConfig{
 				apiKey: env.GetString("RESEND_API_KEY", ""),
 			},
 		},
-		rateLimiter: DefaultRateLimitConfig(),
+		rateLimiter: middleware.DefaultRateLimitConfig(),
 	}
 
-	// logger
 	logger := zap.Must(zap.NewProduction()).Sugar()
 	defer logger.Sync()
 
-	db, err := db.New(
+	database, err := db.New(
 		cfg.db.addr,
 		cfg.db.maxOpenConns,
 		cfg.db.maxIdleConns,
 		cfg.db.maxIdleTime,
 	)
-
 	if err != nil {
 		logger.Fatal(err)
 	}
-
-	defer db.Close()
+	defer database.Close()
 	logger.Info("database connection pool established")
 
-	store := store.NewStorage(db)
-
+	store := store.NewStorage(database)
 	mailer := mailer.NewResend(cfg.mail.resend.apiKey, cfg.mail.fromEmail)
 
-	// Initialize metrics
-	metrics, err := NewMetrics()
+	metrics, err := middleware.NewMetrics()
 	if err != nil {
 		logger.Fatal(err)
 	}
 
+	authService := service.NewAuthService(store, mailer, cfg.frontendURL, cfg.env, cfg.mail.exp)
+
 	app := &application{
-		config:  cfg,
-		store:   store,
-		logger:  logger,
-		mailer:  mailer,
-		metrics: metrics,
+		config:      cfg,
+		store:       store,
+		logger:      logger,
+		mailer:      mailer,
+		metrics:     metrics,
+		authService: authService,
 	}
 
 	mux := app.mount()
-
 	logger.Fatal(app.run(mux))
 }
