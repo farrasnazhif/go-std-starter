@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/farrasnazhif/go-std-starter/cmd/api/middleware"
 	"github.com/farrasnazhif/go-std-starter/internal/db"
 	"github.com/farrasnazhif/go-std-starter/internal/env"
@@ -45,7 +43,6 @@ func main() {
 		env: env.GetString("ENV", "development"),
 		mail: mailConfig{
 			fromEmail: env.GetString("MAIL_FROM_EMAIL", "onboarding@resend.dev"),
-			exp:       time.Hour * 24 * 3,
 			resend: resendConfig{
 				apiKey: env.GetString("RESEND_API_KEY", ""),
 			},

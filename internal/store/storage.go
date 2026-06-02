@@ -10,11 +10,9 @@ import (
 )
 
 type Users interface {
-	Create(ctx context.Context, tx *sql.Tx, user *models.User) error
+	Create(ctx context.Context, user *models.User) error
 	GetByID(ctx context.Context, id int64) (*models.User, error)
 	GetByEmail(ctx context.Context, email string) (*models.User, error)
-	CreateAndInvite(ctx context.Context, user *models.User, token string, invitationExp time.Duration) error
-	Activate(ctx context.Context, token string) error
 	ActivateByEmail(ctx context.Context, email string) error
 	ResetPassword(ctx context.Context, email string, hashedPassword []byte) error
 	Delete(ctx context.Context, userID int64) error

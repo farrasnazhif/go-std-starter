@@ -9,7 +9,6 @@ import (
 
 type RateLimitConfig struct {
 	RegisterLimit   int
-	ActivateLimit   int
 	GeneralAPILimit int
 	MetricsLimit    int
 	OTPSendLimit    int
@@ -19,7 +18,6 @@ type RateLimitConfig struct {
 func DefaultRateLimitConfig() RateLimitConfig {
 	return RateLimitConfig{
 		RegisterLimit:   5,
-		ActivateLimit:   10,
 		GeneralAPILimit: 30,
 		MetricsLimit:    15,
 		OTPSendLimit:    3,

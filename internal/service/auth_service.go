@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/farrasnazhif/go-std-starter/internal/mailer"
 	"github.com/farrasnazhif/go-std-starter/internal/store"
@@ -39,20 +38,14 @@ func (s *AuthService) Register(ctx context.Context, username, email, password st
 		return nil, err
 	}
 
-	// Create user with is_active = false (default)
-	if err := s.store.Users.CreateAndInvite(ctx, user, "", time.Hour); err != nil {
+	if err := s.store.Users.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
-	// Send OTP for verification
 	if err := s.otpService.Send(ctx, email, PurposeActivation); err != nil {
 		_ = s.store.Users.Delete(ctx, user.ID)
 		return nil, err
 	}
 
 	return &RegisterResult{User: user}, nil
-}
-
-func (s *AuthService) Activate(ctx context.Context, token string) error {
-	return s.store.Users.Activate(ctx, token)
 }

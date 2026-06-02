@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 
@@ -20,21 +19,18 @@ var usernames = []string{
 	"walter", "xenia", "yasmin", "zoe",
 }
 
-func Seed(s store.Storage, db *sql.DB) {
+func Seed(s store.Storage) {
 	ctx := context.Background()
 
 	users := generateUsers(100)
-	tx, _ := db.BeginTx(ctx, nil)
 
 	for _, user := range users {
-		if err := s.Users.Create(ctx, tx, user); err != nil {
-			_ = tx.Rollback()
+		if err := s.Users.Create(ctx, user); err != nil {
 			log.Println("Error creating user:", err)
 			return
 		}
 	}
 
-	tx.Commit()
 	log.Println("Seeding complete!")
 }
 

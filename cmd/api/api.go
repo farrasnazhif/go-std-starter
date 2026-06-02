@@ -39,7 +39,6 @@ type config struct {
 type mailConfig struct {
 	resend    resendConfig
 	fromEmail string
-	exp       time.Duration
 }
 
 type resendConfig struct {
@@ -70,8 +69,6 @@ func (app *application) mount() http.Handler {
 		r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(docsURL)))
 
 		r.Route("/users", func(r chi.Router) {
-			r.With(app.rateLimiter(app.config.rateLimiter.ActivateLimit)).Put("/activate/{token}", app.activateUserHandler)
-
 			r.Route("/{userID}", func(r chi.Router) {
 				r.Use(app.usersContextMiddleware)
 				r.Use(app.rateLimiter(app.config.rateLimiter.GeneralAPILimit))
