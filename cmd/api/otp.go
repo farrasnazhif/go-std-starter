@@ -20,7 +20,6 @@ func (app *application) sendOTPHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Ensure user exists and is not already active
 	user, err := app.store.Users.GetByEmail(r.Context(), payload.Email)
 	if err != nil {
 		switch err {
@@ -36,7 +35,7 @@ func (app *application) sendOTPHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := app.otpService.Send(r.Context(), payload.Email); err != nil {
+	if err := app.otpService.Send(r.Context(), payload.Email, service.PurposeActivation); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
@@ -55,7 +54,7 @@ func (app *application) verifyOTPHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := app.otpService.Verify(r.Context(), payload.Email, payload.Code); err != nil {
+	if err := app.otpService.Verify(r.Context(), payload.Email, payload.Code, service.PurposeActivation); err != nil {
 		switch err {
 		case service.ErrInvalidOTP:
 			app.badRequestResponse(w, r, err)

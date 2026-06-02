@@ -45,7 +45,7 @@ func (s *AuthService) Register(ctx context.Context, username, email, password st
 	}
 
 	// Send OTP for verification
-	if err := s.otpService.Send(ctx, email); err != nil {
+	if err := s.otpService.Send(ctx, email, PurposeActivation); err != nil {
 		_ = s.store.Users.Delete(ctx, user.ID)
 		return nil, err
 	}

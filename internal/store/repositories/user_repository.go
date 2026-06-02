@@ -91,6 +91,14 @@ func (r *UserRepository) ActivateByEmail(ctx context.Context, email string) erro
 	return err
 }
 
+func (r *UserRepository) ResetPassword(ctx context.Context, email string, hashedPassword []byte) error {
+	query := `UPDATE users SET password = $1 WHERE email = $2`
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+	_, err := r.db.ExecContext(ctx, query, hashedPassword, email)
+	return err
+}
+
 func (r *UserRepository) CreateAndInvite(ctx context.Context, user *models.User, token string, invitationExp time.Duration) error {
 	return withTx(r.db, ctx, func(tx *sql.Tx) error {
 		if err := r.Create(ctx, tx, user); err != nil {

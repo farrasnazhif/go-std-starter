@@ -81,6 +81,9 @@ func (app *application) mount() http.Handler {
 
 		r.Route("/auth", func(r chi.Router) {
 			r.With(app.rateLimiter(app.config.rateLimiter.RegisterLimit)).Post("/user", app.registerUserHandler)
+			r.Post("/forgot-password", app.forgotPasswordHandler)
+			r.Post("/forgot-password/verify", app.verifyForgotPasswordHandler)
+			r.Post("/reset-password", app.resetPasswordHandler)
 		})
 
 		r.Route("/otp", func(r chi.Router) {
