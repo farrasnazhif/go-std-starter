@@ -76,7 +76,8 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	authService := service.NewAuthService(store, mailer, cfg.frontendURL, cfg.env, cfg.mail.exp)
+	authService := service.NewAuthService(store, mailer, cfg.env)
+	otpService := service.NewOTPService(store, mailer, cfg.env)
 
 	app := &application{
 		config:      cfg,
@@ -85,6 +86,7 @@ func main() {
 		mailer:      mailer,
 		metrics:     metrics,
 		authService: authService,
+		otpService:  otpService,
 	}
 
 	mux := app.mount()

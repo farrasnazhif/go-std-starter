@@ -8,20 +8,8 @@ import (
 	"github.com/farrasnazhif/go-std-starter/internal/store/repositories"
 )
 
-// registerUserHandler godoc
-//
-//	@Summary		Registers a user
-//	@Description	Registers a user
-//	@Tags			authentication
-//	@Accept			json
-//	@Produce		json
-//	@Param			payload	body		dto.RegisterUserRequest	true	"User credentials"
-//	@Success		201		{object}	dto.UserWithToken		"User registered"
-//	@Failure		400		{object}	error
-//	@Failure		500		{object}	error
-//	@Router			/auth/user [post]
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	var payload dto.RegisterUserRequest
+	var payload dto.RegisterUserPayload
 	if err := lib.ReadJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
@@ -43,12 +31,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	userWithToken := dto.UserWithToken{
-		User:  result.User,
-		Token: result.Token,
-	}
-
-	if err := lib.JSONResponse(w, http.StatusCreated, "User registered successfully", userWithToken); err != nil {
+	if err := lib.JSONResponse(w, http.StatusCreated, "User registered. Please verify your email with the OTP sent.", result.User); err != nil {
 		app.internalServerError(w, r, err)
 	}
 }

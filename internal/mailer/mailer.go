@@ -6,6 +6,7 @@ const (
 	FromName            = "GoSocial"
 	maxRetries          = 3
 	UserWelcomeTemplate = "user_invitation.tmpl"
+	OTPTemplate         = "otp.tmpl"
 )
 
 //go:embed templates/*

@@ -23,6 +23,7 @@ type application struct {
 	mailer      mailer.Client
 	metrics     *middleware.Metrics
 	authService *service.AuthService
+	otpService  *service.OTPService
 }
 
 type config struct {
@@ -80,6 +81,11 @@ func (app *application) mount() http.Handler {
 
 		r.Route("/auth", func(r chi.Router) {
 			r.With(app.rateLimiter(app.config.rateLimiter.RegisterLimit)).Post("/user", app.registerUserHandler)
+		})
+
+		r.Route("/otp", func(r chi.Router) {
+			r.With(app.rateLimiter(app.config.rateLimiter.OTPSendLimit)).Post("/send", app.sendOTPHandler)
+			r.Post("/verify", app.verifyOTPHandler)
 		})
 	})
 

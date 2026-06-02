@@ -67,6 +67,30 @@ func (r *UserRepository) GetByID(ctx context.Context, id int64) (*models.User, e
 	return &user, nil
 }
 
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	query := `SELECT id, email, username, is_active, created_at FROM users WHERE email = $1`
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+
+	var user models.User
+	err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Email, &user.Username, &user.IsActive, &user.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) ActivateByEmail(ctx context.Context, email string) error {
+	query := `UPDATE users SET is_active = true WHERE email = $1`
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+	_, err := r.db.ExecContext(ctx, query, email)
+	return err
+}
+
 func (r *UserRepository) CreateAndInvite(ctx context.Context, user *models.User, token string, invitationExp time.Duration) error {
 	return withTx(r.db, ctx, func(tx *sql.Tx) error {
 		if err := r.Create(ctx, tx, user); err != nil {

@@ -12,6 +12,7 @@ type RateLimitConfig struct {
 	ActivateLimit   int
 	GeneralAPILimit int
 	MetricsLimit    int
+	OTPSendLimit    int
 	WindowDuration  time.Duration
 }
 
@@ -21,6 +22,7 @@ func DefaultRateLimitConfig() RateLimitConfig {
 		ActivateLimit:   10,
 		GeneralAPILimit: 30,
 		MetricsLimit:    15,
+		OTPSendLimit:    3,
 		WindowDuration:  time.Minute,
 	}
 }

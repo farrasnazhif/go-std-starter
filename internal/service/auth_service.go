@@ -2,38 +2,31 @@ package service
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
 	"time"
 
 	"github.com/farrasnazhif/go-std-starter/internal/mailer"
 	"github.com/farrasnazhif/go-std-starter/internal/store"
 	"github.com/farrasnazhif/go-std-starter/internal/store/models"
-	"github.com/google/uuid"
 )
 
 type AuthService struct {
-	store       store.Storage
-	mailer      mailer.Client
-	frontendURL string
-	env         string
-	mailExp     time.Duration
+	store      store.Storage
+	mailer     mailer.Client
+	env        string
+	otpService *OTPService
 }
 
-func NewAuthService(store store.Storage, mailer mailer.Client, frontendURL, env string, mailExp time.Duration) *AuthService {
+func NewAuthService(store store.Storage, mailer mailer.Client, env string) *AuthService {
 	return &AuthService{
-		store:       store,
-		mailer:      mailer,
-		frontendURL: frontendURL,
-		env:         env,
-		mailExp:     mailExp,
+		store:      store,
+		mailer:     mailer,
+		env:        env,
+		otpService: NewOTPService(store, mailer, env),
 	}
 }
 
 type RegisterResult struct {
-	User  *models.User
-	Token string
+	User *models.User
 }
 
 func (s *AuthService) Register(ctx context.Context, username, email, password string) (*RegisterResult, error) {
@@ -46,31 +39,18 @@ func (s *AuthService) Register(ctx context.Context, username, email, password st
 		return nil, err
 	}
 
-	plainToken := uuid.New().String()
-	hash := sha256.Sum256([]byte(plainToken))
-	hashToken := hex.EncodeToString(hash[:])
-
-	if err := s.store.Users.CreateAndInvite(ctx, user, hashToken, s.mailExp); err != nil {
+	// Create user with is_active = false (default)
+	if err := s.store.Users.CreateAndInvite(ctx, user, "", time.Hour); err != nil {
 		return nil, err
 	}
 
-	activationURL := fmt.Sprintf("%s/confirm/%s", s.frontendURL, plainToken)
-	isProd := s.env == "production"
-	vars := struct {
-		Username      string
-		ActivationURL string
-	}{
-		Username:      user.Username,
-		ActivationURL: activationURL,
-	}
-
-	if err := s.mailer.Send(mailer.UserWelcomeTemplate, user.Username, user.Email, vars, !isProd); err != nil {
-		// rollback user creation if email fails (SAGA pattern)
+	// Send OTP for verification
+	if err := s.otpService.Send(ctx, email); err != nil {
 		_ = s.store.Users.Delete(ctx, user.ID)
 		return nil, err
 	}
 
-	return &RegisterResult{User: user, Token: plainToken}, nil
+	return &RegisterResult{User: user}, nil
 }
 
 func (s *AuthService) Activate(ctx context.Context, token string) error {
